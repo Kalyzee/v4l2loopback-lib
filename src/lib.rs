@@ -28,6 +28,23 @@ struct V4l2LoopbackCtl {
 	pub announce_all_caps : c_int,
 }
 
+impl Default for V4l2LoopbackCtl {
+	fn default() -> Self {
+		V4l2LoopbackCtl {
+			output_nr: 0,
+			capture_nr: 0,
+			card_label: "v4l2loopback".as_ptr() as *mut c_char,
+			min_width: 0,
+			max_width: 0,
+			min_height: 0,
+			max_height: 0,
+			max_buffers: 0,
+			max_openers: 0,
+			debug: 0,
+			announce_all_caps: 0,
+		}
+	}
+}
 
 
 pub struct V4L2Loopback{
@@ -45,39 +62,17 @@ impl V4L2Loopback{
 	}
 	
 	pub fn add(&self, device_id: c_int){
-		let _ = unsafe { v4l2loopback_add(self.file.as_raw_fd(), &mut V4l2LoopbackCtl{
-				output_nr: device_id,
-				capture_nr: 0,
-				card_label: "v4l2loopback".as_ptr() as *mut c_char,
-				min_width: 0,
-				max_width: 0,
-				min_height: 0,
-				max_height: 0,
-				max_buffers: 0,
-				max_openers: 0,
-				debug: 0,
-				announce_all_caps: 0,
-			} as *mut V4l2LoopbackCtl)};
+		let mut v4l2loopbackctl = V4l2LoopbackCtl::default();
+		v4l2loopbackctl.output_nr = device_id;
+		let _ = unsafe { v4l2loopback_add(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
 	}	
 
 	pub fn query(&self, device_id: c_int){
 
-		let mut v4l2loopbackctl = V4l2LoopbackCtl{
-				output_nr: device_id,
-				capture_nr: 0,
-				card_label: "v4l2loopback".as_ptr() as *mut c_char,
-				min_width: 0,
-				max_width: 0,
-				min_height: 0,
-				max_height: 0,
-				max_buffers: 0,
-				max_openers: 0,
-				debug: 0,
-				announce_all_caps: 0,
-			};
-
+		let mut v4l2loopbackctl = V4l2LoopbackCtl::default();
+		v4l2loopbackctl.output_nr = device_id;
 		let _ = unsafe { v4l2loopback_query(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
-		println!("{:#?}", v4l2loopbackctl);
+		println!("output_nr: {:#?}", v4l2loopbackctl);
 	}
 
 	pub fn remove(&self, device_id: c_int){
