@@ -66,7 +66,7 @@ impl V4L2Loopback{
 		let mut v4l2loopbackctl = V4l2LoopbackCtl::default();
 		v4l2loopbackctl.output_nr = device_id;
 		let result = unsafe { v4l2loopback_add(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
-		if (result.is_err()){
+		if result.is_err(){
 			return Err(result.unwrap_err());
 		}
 		Ok(v4l2loopbackctl)
@@ -77,7 +77,7 @@ impl V4L2Loopback{
 		let mut v4l2loopbackctl = V4l2LoopbackCtl::default();
 		v4l2loopbackctl.output_nr = device_id;
 		let result = unsafe { v4l2loopback_query(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
-		if (result.is_err()){
+		if result.is_err(){
 			return Err(result.unwrap_err());
 		}
 		Ok(v4l2loopbackctl)
@@ -85,7 +85,7 @@ impl V4L2Loopback{
 
 	pub fn remove(&self, device_id: c_int) -> Result<(), nix::Error>{
 		let result = unsafe { v4l2loopback_remove(self.file.as_raw_fd(), device_id.try_into().unwrap())};
-		if (result.is_err()){
+		if result.is_err(){
 			return Err(result.unwrap_err());
 		}
 		Ok(())
