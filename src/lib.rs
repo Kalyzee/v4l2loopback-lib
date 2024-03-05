@@ -12,9 +12,10 @@ const V4L2LOOPBACK_CTL_ADD: u32 = 0x4C80;
 const V4L2LOOPBACK_CTL_QUERY: u32 = 0x4C82;
 const V4L2LOOPBACK_CTL_REMOVE: u32 = 0x4C81;
 
+
 #[repr(C)]
 #[derive(Debug)]
-struct V4l2LoopbackCtl {
+pub struct V4l2LoopbackCtl {
     pub output_nr: c_int,
     pub capture_nr: c_int,
 	pub card_label: *mut c_char,
@@ -61,22 +62,33 @@ impl V4L2Loopback{
 		}
 	}
 	
-	pub fn add(&self, device_id: c_int){
+	pub fn add(&self, device_id: c_int) ->  Result<V4l2LoopbackCtl, nix::Error>{
 		let mut v4l2loopbackctl = V4l2LoopbackCtl::default();
 		v4l2loopbackctl.output_nr = device_id;
-		let _ = unsafe { v4l2loopback_add(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
+		let result = unsafe { v4l2loopback_add(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
+		if (result.is_err()){
+			return Err(result.unwrap_err());
+		}
+		Ok(v4l2loopbackctl)
 	}	
 
-	pub fn query(&self, device_id: c_int){
+	pub fn query(&self, device_id: c_int) -> Result<V4l2LoopbackCtl, nix::Error>{
 
 		let mut v4l2loopbackctl = V4l2LoopbackCtl::default();
 		v4l2loopbackctl.output_nr = device_id;
-		let _ = unsafe { v4l2loopback_query(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
-		println!("output_nr: {:#?}", v4l2loopbackctl);
+		let result = unsafe { v4l2loopback_query(self.file.as_raw_fd(), &mut v4l2loopbackctl as *mut V4l2LoopbackCtl)};
+		if (result.is_err()){
+			return Err(result.unwrap_err());
+		}
+		Ok(v4l2loopbackctl)
 	}
 
-	pub fn remove(&self, device_id: c_int){
-		let _ = unsafe { v4l2loopback_remove(self.file.as_raw_fd(), device_id.try_into().unwrap())};
+	pub fn remove(&self, device_id: c_int) -> Result<(), nix::Error>{
+		let result = unsafe { v4l2loopback_remove(self.file.as_raw_fd(), device_id.try_into().unwrap())};
+		if (result.is_err()){
+			return Err(result.unwrap_err());
+		}
+		Ok(())
 	}
 }
 
